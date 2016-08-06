@@ -75,10 +75,10 @@ function askQuestion() {
 
 function checkAnswer(ans) {
 	if (combos[index].answer == ans) {
-		console.log("Correct!");
+		$("#check").html("Correct!");
 	}
 	else {
-		console.log("Wrong!");
+		$("#check").html("Wrong!");
 	}
 }
 
