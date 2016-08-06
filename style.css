@@ -1,0 +1,14 @@
+* {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+canvas {
+	display: block;
+}
