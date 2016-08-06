@@ -2,6 +2,7 @@
 /////////////////////////////////////////////////////////////////////
 
 $(document).ready(function() {
+	
 	$("#add").click(function() {
 		if ($("#question").val() != "" && $("#answer").val() != "") {
 			combos.push(new Combo($("#question").val(),$("#answer").val()));	
@@ -11,13 +12,6 @@ $(document).ready(function() {
 	});
 	$("#print").click(function() {
 		printCombos();
-	});
-	$("#ask").click(function() {
-		askQuestion();
-	});
-	$("#submit-answer").click(function() {
-		checkAnswer($("#your-answer").val());
-		$("#your-answer").val('');
 	});
 	$('body').on('click', '.delete' ,function(){
 		combos.splice($(this).attr('id'),1);
@@ -44,13 +38,52 @@ $(document).ready(function() {
 	$('body').on('click', '#cancel', function(){
 		clearEdit();
 	});
+	///////////////////////////////////////////////
+	$("#start").click(function() {
+		score = new Score();
+		isStudying = true;
+		indexCount = 0;
+		$("#score").html(score.totalScore + " / " + score.maxScore);
+		$("#time").html(timer.seconds);
+		askQuestion();
+	});
+	$("#submit-answer").click(function() {
+		checkAnswer($("#your-answer").val());
+		$("#your-answer").val('');
+		timer.reset();
+		if (indexCount < combos.length) {
+			askQuestion();
+		}
+		else {
+			isStudying = false;
+			$("#score").html("score");
+			$("#time").html("timer");
+			$("#asked-question").html("see question here...");
+			alert("Game Over!");
+		}
+	});
+	//////////////////////////////////////////////
 });
 
 /////////////////////////////////////////////////////////////////////
 
 var combos = [];
 var index;
+var indexCount;
 var currentEdit;
+var timer = new Timer();
+var isStudying = false;
+var score = new Score();
+
+// setInterval(function printTime() {
+// 	if (isStudying) {
+// 		timer.update();
+// 		$("#time").html(timer.seconds);
+// 		if (timer.seconds <= 0) {
+// 			askQuestion();
+// 		}
+// 	}
+// },1000);
 
 /////////////////////////////////////////////////////////////////////
 
@@ -67,25 +100,28 @@ function printCombos() {
 
 function askQuestion() {
 	index = randomBetween(0,combos.length);
-	if (!combos[index].done) {
-		$("#asked-question").html(combos[index].question);
-		combos[index].done = true;
+	while (combos[index].done) {
+		index = randomBetween(0,combos.length);
 	}
+	$("#asked-question").html(combos[index].question);
+	combos[index].done = true;
+	indexCount++;
 }
 
 function checkAnswer(ans) {
 	if (combos[index].answer == ans) {
 		$("#check").html("Correct!");
+		score.addScore();
 	}
 	else {
 		$("#check").html("Wrong!");
 	}
+	$("#score").html(score.totalScore + " / " + score.maxScore);
 }
 
 function clearEdit() {
 	$(".edit-display").html('');
 }
-
 
 /////////////////////////////////////////////////////////////////////
 
@@ -99,4 +135,26 @@ function Combo(q,a) {
 	this.question = q;
 	this.answer = a;
 	this.done = false;
+}
+
+function Timer() {
+	this.defaultSeconds = 10;
+	this.seconds = this.defaultSeconds;
+	this.minSeconds = 0;
+	this.reset = function() {
+		this.seconds = this.defaultSeconds;
+	}
+	this.update = function() {
+		if (this.seconds > this.minSeconds) {
+			this.seconds--;
+		}
+	}
+}
+
+function Score() {
+	this.totalScore = 0;
+	this.maxScore = combos.length;
+	this.addScore = function() {
+		this.totalScore++;
+	}
 }
