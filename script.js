@@ -43,24 +43,14 @@ $(document).ready(function() {
 		score = new Score();
 		isStudying = true;
 		indexCount = 0;
-		$("#score").html(score.totalScore + " / " + score.maxScore);
+		$("#score").html(score.totalScore + " / " + score.maxScore + " : " +
+			indexCount + " / " + score.maxScore);
 		$("#time").html(timer.seconds);
+		initCombo();
 		askQuestion();
 	});
 	$("#submit-answer").click(function() {
-		checkAnswer($("#your-answer").val());
-		$("#your-answer").val('');
-		timer.reset();
-		if (indexCount < combos.length) {
-			askQuestion();
-		}
-		else {
-			isStudying = false;
-			$("#score").html("score");
-			$("#time").html("timer");
-			$("#asked-question").html("see question here...");
-			alert("Game Over!");
-		}
+		nextQuestion();
 	});
 	//////////////////////////////////////////////
 });
@@ -75,15 +65,15 @@ var timer = new Timer();
 var isStudying = false;
 var score = new Score();
 
-// setInterval(function printTime() {
-// 	if (isStudying) {
-// 		timer.update();
-// 		$("#time").html(timer.seconds);
-// 		if (timer.seconds <= 0) {
-// 			askQuestion();
-// 		}
-// 	}
-// },1000);
+setInterval(function printTime() {
+	if (isStudying) {
+		timer.minus();
+		$("#time").html(timer.seconds);
+		if (timer.seconds == 0) {
+			nextQuestion();
+		}
+	}
+},1000);
 
 /////////////////////////////////////////////////////////////////////
 
@@ -98,6 +88,23 @@ function printCombos() {
 	}
 }
 
+function nextQuestion() {
+	indexCount++;
+	timer.reset();
+	checkAnswer($("#your-answer").val());
+	$("#your-answer").val('');
+	if (indexCount < combos.length) {
+		askQuestion();
+	}
+	else {
+		alert("Game Over!");
+		isStudying = false;
+		$("#score").html("score");
+		$("#time").html("timer");
+		$("#asked-question").html("see question here...");
+	}
+}
+
 function askQuestion() {
 	index = randomBetween(0,combos.length);
 	while (combos[index].done) {
@@ -105,7 +112,6 @@ function askQuestion() {
 	}
 	$("#asked-question").html(combos[index].question);
 	combos[index].done = true;
-	indexCount++;
 }
 
 function checkAnswer(ans) {
@@ -116,11 +122,18 @@ function checkAnswer(ans) {
 	else {
 		$("#check").html("Wrong!");
 	}
-	$("#score").html(score.totalScore + " / " + score.maxScore);
+	$("#score").html(score.totalScore + " / " + score.maxScore + " : " +
+			indexCount + " / " + score.maxScore);
 }
 
 function clearEdit() {
 	$(".edit-display").html('');
+}
+
+function initCombo() {
+	for (var i = 0; i < combos.length; i++) {
+		combos[i].done = false;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -134,20 +147,18 @@ function randomBetween(min, max) {
 function Combo(q,a) {
 	this.question = q;
 	this.answer = a;
-	this.done = false;
+	this.done;
 }
 
 function Timer() {
-	this.defaultSeconds = 10;
+	this.defaultSeconds = 5;
 	this.seconds = this.defaultSeconds;
 	this.minSeconds = 0;
 	this.reset = function() {
-		this.seconds = this.defaultSeconds;
+		this.seconds = this.defaultSeconds+1;
 	}
-	this.update = function() {
-		if (this.seconds > this.minSeconds) {
-			this.seconds--;
-		}
+	this.minus = function() {
+		this.seconds--;
 	}
 }
 
